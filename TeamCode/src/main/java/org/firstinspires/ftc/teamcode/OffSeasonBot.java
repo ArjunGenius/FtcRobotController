@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @TeleOp(name = "OffSeasonBot")
 public class OffSeasonBot extends LinearOpMode {
@@ -28,21 +29,48 @@ public class OffSeasonBot extends LinearOpMode {
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         waitForStart();
         while (opModeIsActive()) {
             double f = -gamepad1.left_stick_y;
             double r = gamepad1.right_stick_x;
             double s = gamepad1.left_stick_x;
 
-            frontLeft.setPower((f+r+s)/3);
-            frontRight.setPower((f-r-s)/3);
-            backLeft.setPower((f+r-s)/3);
-            backRight.setPower((f-r+s)/3);
-
         }
 
 
+    }
+    private void setPowers(double backLeftPower, double backRightPower, double frontLeftPower,
+        double frontRightPower) {
+        double maxSpeed = 1.0;
+        maxSpeed = Math.max(maxSpeed, Math.abs(backLeftPower));
+        maxSpeed = Math.max(maxSpeed, Math.abs(backRightPower));
+        maxSpeed = Math.max(maxSpeed, Math.abs(frontLeftPower));
+        maxSpeed = Math.max(maxSpeed, Math.abs(frontRightPower));
+        backLeftPower/=maxSpeed;
+        backRightPower/=maxSpeed;
+        frontLeftPower/=maxSpeed;
+        frontRightPower/=maxSpeed;
 
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
+    }
+    public void drive(double f, double r, double s) {
+        double frontLeftPower = f+r+s;
+        double frontRightPower = f-r-s;
+        double backLeftPower = f+r-s;
+        double backRightPower= f-r+s;
+
+        setPowers(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
+    }
+
+    public void init(HardwareMap hardwareMap) {
     }
 }
 
